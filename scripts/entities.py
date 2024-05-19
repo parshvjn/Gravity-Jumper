@@ -10,9 +10,9 @@ class PhysicsEntity:
 
         #animation
         self.action = ''
-        self.anim_offset = (-3, -4)
+        self.anim_offset = (-3, -3)
         self.flip = False
-        self.set_action('run')
+        self.set_action('idle')
 
         self.last_movement = [0,0]
 
@@ -72,3 +72,35 @@ class PhysicsEntity:
 
     def render(self, surf, offset =(0,0)):
         surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
+
+
+class Player(PhysicsEntity): #inheriting from PhysicsEntity
+    def __init__(self, game, pos, size): # we are seperating this part from the above class and putting in another because the animation logic is diff from other entities
+        super().__init__(game, 'player', pos, size)
+        self.air_time = 0
+        self.jumps = 3
+        self.jumpNum = self.jumps
+    
+    def update(self, tilemap, movement = (0,0)):
+        super().update(tilemap, movement = movement)
+
+        if self.air_time > 4:
+            self.set_action('jump')
+        elif movement[0] != 0: 
+            self.set_action('run')
+        else:
+            self.set_action('idle')
+
+        if self.collisions['down']: # if on ground
+            self.air_time = 0
+            self.jumps = self.jumpNum
+        print(self.air_time)
+    def render(self, surf, offset =(0,0)):
+        super().render(surf, offset = offset)
+
+    def jump(self):
+        if self.jumps:
+            self.velocity[1] = -3
+            self.jumps -= 1
+            self.air_time = 5
+    
